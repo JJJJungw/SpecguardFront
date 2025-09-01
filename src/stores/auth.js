@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import axios from "axios";
+import { signup, login } from "@/api/auth";
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
@@ -8,10 +8,10 @@ export const useAuthStore = defineStore("auth", {
     }),
     actions: {
         async signup(payload) {
-            await axios.post("/api/v1/auth/signup", payload);
+            await signup(payload);
         },
         async login(email, password) {
-            const res = await axios.post("/api/v1/auth/login", { email, password }, { withCredentials: true });
+            const res = await login(email, password);
             this.accessToken = res.data.accessToken;
             this.user = res.data.user;
         },
