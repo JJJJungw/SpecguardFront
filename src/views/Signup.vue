@@ -24,9 +24,9 @@
 
 <script setup>
 import { reactive } from "vue";
-import { useAuthStore } from "@/stores/auth";
-
-const authStore = useAuthStore();
+import { useRouter } from "vue-router";
+import { signup } from "@/api/auth";
+const router = useRouter();
 
 const form = reactive({
   company: {
@@ -48,8 +48,9 @@ const form = reactive({
 
 const submit = async () => {
   try {
-    await authStore.signup(form);
-    alert("회원가입 성공! 로그인 페이지로 이동하세요.");
+    await signup(form); // ✅ 스토어 대신 API 직접 호출
+    alert("회원가입 성공! 홈으로 이동합니다.");
+    router.push("/");
   } catch (err) {
     alert("회원가입 실패: " + (err.response?.data?.message || err.message));
   }

@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
+
+import Home from "@/views/Home.vue";
 import Signup from "@/views/Signup.vue";
+import Login from "@/views/Login.vue";
+import Dashboard from "@/views/Dashboard.vue";
 
 const routes = [
-    { path: "/", redirect: "/signup" },   // ✅ 기본 경로를 회원가입으로
-    { path: "/signup", name: "Signup", component: Signup }
+    { path: "/", name: "Home", component: Home },
+    { path: "/signup", name: "Signup", component: Signup },
+    { path: "/login", name: "Login", component: Login },
+    { path: "/dashboard", name: "Dashboard", component: Dashboard },
 ];
 
 const router = createRouter({
@@ -11,4 +17,4 @@ const router = createRouter({
     routes,
 });
 
-export default router;
+export default router; // ✅ 이게 있어야 main.js에서 import router가 동작함
