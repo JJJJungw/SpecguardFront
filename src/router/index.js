@@ -3,6 +3,8 @@ import Signup from "@/views/Signup.vue";
 import Login from "@/views/Login.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import Home from "@/views/Home.vue";
+import InviteSignup from "@/views/InviteSignup.vue";
+import InviteChoice from "@/views/InviteChoice.vue";
 
 const routes = [
     { path: "/", name: "Home", component: Home },
@@ -13,6 +15,17 @@ const routes = [
         name: "Dashboard",
         component: Dashboard,
         props: true,                // ✅ slug를 컴포넌트 props로 전달
+    },
+    {
+        path: "/signup/invite",
+        name: "InviteChoice",
+        component: InviteChoice,
+    },
+    {
+        path: "/signup/invite/form",
+        name: "InviteSignup",
+        component: InviteSignup,
+        props: route => ({ token: route.query.token }) // ✅ token 전달
     },
 ];
 
