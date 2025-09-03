@@ -1,15 +1,19 @@
 import { createRouter, createWebHistory } from "vue-router";
-
-import Home from "@/views/Home.vue";
 import Signup from "@/views/Signup.vue";
 import Login from "@/views/Login.vue";
 import Dashboard from "@/views/Dashboard.vue";
+import Home from "@/views/Home.vue";
 
 const routes = [
     { path: "/", name: "Home", component: Home },
     { path: "/signup", name: "Signup", component: Signup },
     { path: "/login", name: "Login", component: Login },
-    { path: "/dashboard", name: "Dashboard", component: Dashboard },
+    {
+        path: "/:slug/dashboard",   // ✅ 동적 라우트
+        name: "Dashboard",
+        component: Dashboard,
+        props: true,                // ✅ slug를 컴포넌트 props로 전달
+    },
 ];
 
 const router = createRouter({
@@ -17,4 +21,4 @@ const router = createRouter({
     routes,
 });
 
-export default router; // ✅ 이게 있어야 main.js에서 import router가 동작함
+export default router;

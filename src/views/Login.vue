@@ -12,20 +12,19 @@
 <script setup>
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
-import { useRouter } from "vue-router";  // ✅ 추가
+import { useRouter } from "vue-router";
 
 const authStore = useAuthStore();
-const router = useRouter();              // ✅ 추가
+const router = useRouter();
 
 const email = ref("");
 const password = ref("");
 
 const submit = async () => {
-  console.log("🚀 submit 실행됨", email.value, password.value);
   try {
     await authStore.login(email.value, password.value);
-    alert("로그인 성공!");
-    router.push("/dashboard");
+    const slug = authStore.companySlug;
+    router.push(`/${slug}/dashboard`);
   } catch (err) {
     console.error("로그인 실패:", err);
   }
