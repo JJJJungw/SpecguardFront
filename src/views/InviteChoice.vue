@@ -26,7 +26,7 @@ const token = route.query.token;
 
 // ✅ 소셜 로그인 리디렉트
 const redirectToOAuth = () => {
-  window.location.href = `http://localhost:8080/oauth2/authorize/google?token=${token}`;
+  window.location.href = `http://localhost:8080/oauth2/authorization/google?token=${token}`;
 };
 </script>
 

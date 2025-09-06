@@ -11,7 +11,7 @@ export const useAuthStore = defineStore("auth", {
         companySlug: localStorage.getItem("companySlug") || null,
     }),
     actions: {
-        // 로그인
+        // 로컬 로그인
         async login(email, password) {
             const res = await loginApi(email, password);
             this.accessToken = res.headers["authorization"]?.replace("Bearer ", "");
@@ -28,10 +28,35 @@ export const useAuthStore = defineStore("auth", {
             localStorage.setItem("user", JSON.stringify(this.user));
         },
 
-        // ✅ refreshToken
+        // ✅ OAuth2 로그인 후 /api/token 호출 시 토큰 세팅
+        async loginWithOAuth2() {
+            const res = await api.post("/api/token"); // Refresh 쿠키 자동 포함
+            const newAccessToken =
+                res.headers["authorization"]?.replace("Bearer ", "");
+
+            if (!newAccessToken) {
+                throw new Error("OAuth2 로그인 실패: AccessToken 없음");
+            }
+
+            this.accessToken = newAccessToken;
+            localStorage.setItem("accessToken", newAccessToken);
+
+            const payload = jwtDecode(newAccessToken);
+            this.companySlug = payload.companySlug;
+            localStorage.setItem("companySlug", this.companySlug);
+
+            // 유저 정보 조회
+            const userRes = await api.get(`company/${this.companySlug}/users/me`, {
+                headers: { Authorization: `Bearer ${this.accessToken}` },
+            });
+            this.user = userRes.data;
+            localStorage.setItem("user", JSON.stringify(this.user));
+        },
+
+        // RefreshToken → AccessToken 재발급
         async refreshToken() {
             try {
-                const res = await refreshApi.post("/auth/token/refresh"); // 🔹 refreshApi 사용
+                const res = await refreshApi.post("/api/token"); // ✅ 백엔드랑 경로 맞추기
                 const newAccessToken =
                     res.headers["authorization"]?.replace("Bearer ", "");
 
@@ -39,7 +64,6 @@ export const useAuthStore = defineStore("auth", {
                     throw new Error("새로운 액세스 토큰을 받지 못했습니다.");
                 }
 
-                // 저장
                 this.accessToken = newAccessToken;
                 localStorage.setItem("accessToken", newAccessToken);
 
