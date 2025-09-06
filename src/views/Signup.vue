@@ -1,58 +1,74 @@
 <template>
-  <div>
-    <h2>회원가입</h2>
+  <div class="signup">
+    <h2>회사 회원가입</h2>
     <form @submit.prevent="submit">
-      <h3>회사 정보</h3>
-      <input v-model="form.company.name" placeholder="회사명" required />
-      <input v-model="form.company.businessNumber" placeholder="사업자등록번호" required />
-      <input v-model="form.company.slug" placeholder="회사 Slug" />
-      <input v-model="form.company.managerName" placeholder="담당자 이름" required />
-      <input v-model="form.company.managerPosition" placeholder="담당자 직책" />
-      <input v-model="form.company.contactEmail" type="email" placeholder="담당자 이메일" />
-      <input v-model="form.company.contactMobile" placeholder="담당자 전화번호" />
-
-      <h3>사용자 정보</h3>
-      <input v-model="form.user.email" type="email" placeholder="이메일" required />
-      <input v-model="form.user.password" type="password" placeholder="비밀번호" required />
-      <input v-model="form.user.name" placeholder="이름" required />
-      <input v-model="form.user.phone" placeholder="전화번호" />
-
+      <input v-model="companyName" placeholder="회사 이름" required />
+      <input v-model="email" type="email" placeholder="관리자 이메일" required />
+      <input v-model="name" placeholder="관리자 이름" required />
+      <input v-model="password" type="password" placeholder="비밀번호" required />
       <button type="submit">회원가입</button>
     </form>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { signup } from "@/api/auth";
-const router = useRouter();
 
-const form = reactive({
-  company: {
-    name: "",
-    businessNumber: "",
-    slug: "",
-    managerName: "",
-    managerPosition: "",
-    contactEmail: "",
-    contactMobile: "",
-  },
-  user: {
-    email: "",
-    password: "",
-    name: "",
-    phone: "",
-  },
-});
+const companyName = ref("");
+const email = ref("");
+const name = ref("");
+const password = ref("");
+const router = useRouter();
 
 const submit = async () => {
   try {
-    await signup(form); // ✅ 스토어 대신 API 직접 호출
-    alert("회원가입 성공! 홈으로 이동합니다.");
-    router.push("/");
+    const payload = {
+      companyName: companyName.value,
+      email: email.value,
+      name: name.value,
+      password: password.value,
+    };
+
+    await signup(payload);
+    alert("회원가입이 완료되었습니다! 로그인해주세요.");
+    router.push("/login");
   } catch (err) {
-    alert("회원가입 실패: " + (err.response?.data?.message || err.message));
+    console.error("회원가입 실패:", err);
+    alert("회원가입에 실패했습니다.");
   }
 };
 </script>
+
+<style scoped>
+.signup {
+  max-width: 500px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+button {
+  padding: 0.75rem;
+  background: #4cafef;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover {
+  background: #2196f3;
+}
+</style>

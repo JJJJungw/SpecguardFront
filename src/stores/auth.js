@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import api from "@/api/axios";
-import refreshApi from "@/api/refresh"; // 🔹 추가
+import refreshApi from "@/api/refresh";
 import { login as loginApi } from "@/api/auth";
 import { jwtDecode } from "jwt-decode";
 
@@ -28,9 +28,9 @@ export const useAuthStore = defineStore("auth", {
             localStorage.setItem("user", JSON.stringify(this.user));
         },
 
-        // ✅ OAuth2 로그인 후 /api/token 호출 시 토큰 세팅
+        // ✅ OAuth2 로그인 후 /api/v1/auth/token 호출
         async loginWithOAuth2() {
-            const res = await api.post("/api/token"); // Refresh 쿠키 자동 포함
+            const res = await api.post("/auth/token"); // Refresh 쿠키 자동 포함
             const newAccessToken =
                 res.headers["authorization"]?.replace("Bearer ", "");
 
@@ -45,7 +45,6 @@ export const useAuthStore = defineStore("auth", {
             this.companySlug = payload.companySlug;
             localStorage.setItem("companySlug", this.companySlug);
 
-            // 유저 정보 조회
             const userRes = await api.get(`company/${this.companySlug}/users/me`, {
                 headers: { Authorization: `Bearer ${this.accessToken}` },
             });
@@ -53,10 +52,11 @@ export const useAuthStore = defineStore("auth", {
             localStorage.setItem("user", JSON.stringify(this.user));
         },
 
-        // RefreshToken → AccessToken 재발급
+        // ✅ RefreshToken → AccessToken 재발급
         async refreshToken() {
             try {
-                const res = await refreshApi.post("/api/token"); // ✅ 백엔드랑 경로 맞추기
+                // 🔹 수정: 백엔드 경로에 맞춤 (/auth/token/refresh)
+                const res = await refreshApi.post("/auth/token/refresh");
                 const newAccessToken =
                     res.headers["authorization"]?.replace("Bearer ", "");
 
