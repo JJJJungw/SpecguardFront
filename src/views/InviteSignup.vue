@@ -1,94 +1,52 @@
 <template>
-  <div class="invite-signup">
-    <h2>초대 회원가입</h2>
-    <p v-if="inviteInfo">초대받은 이메일: <strong>{{ inviteInfo.email }}</strong></p>
-    <p v-if="inviteInfo">역할: <strong>{{ inviteInfo.role }}</strong></p>
-    <p v-if="inviteInfo">회사: <strong>{{ inviteInfo.companyName }}</strong></p>
+  <div class="invite-choice">
+    <h2>회원가입 방법 선택</h2>
 
-    <form @submit.prevent="submit">
-      <input v-model="name" placeholder="이름" required />
-      <input v-model="phone" placeholder="전화번호" />
-      <input v-model="password" type="password" placeholder="비밀번호" required />
-      <button type="submit">회원가입</button>
-    </form>
+    <!-- ✅ 오류 메시지 표시 -->
+    <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
+
+    <p>초대받은 이메일: <strong>{{ inviteInfo?.email }}</strong></p>
+    <p>회사: <strong>{{ inviteInfo?.companyName }}</strong></p>
+    <p>역할: <strong>{{ inviteInfo?.role }}</strong></p>
+
+    <button @click="goTo('direct')">직접 정보 입력하기</button>
+    <button @click="goTo('google')">구글로 가입하기</button>
+    <button @click="goTo('naver')">네이버로 가입하기</button>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import api from "@/api/axios";
+import { ref } from "vue";
 
 const route = useRoute();
 const router = useRouter();
-const token = route.query.token;
 
-const name = ref("");
-const phone = ref("");
-const password = ref("");
-const inviteInfo = ref(null);
+// 🔹 쿼리 파라미터에서 errorMessage 읽기
+const errorMessage = ref(route.query.errorMessage || null);
 
-// ✅ 초대 토큰 검증 (백엔드 /auth/signup/invite/check)
-onMounted(async () => {
-  try {
-    const res = await api.get(`/auth/signup/invite/check?token=${token}`);
-    console.log("🔍 checkInvite API 응답:", res.data);
-    inviteInfo.value = res.data;
-  } catch (err) {
-    console.error("초대 검증 실패:", err);
-    alert("초대 링크가 유효하지 않거나 만료되었습니다.");
-    router.push("/login");
-  }
+// ✅ 초대 정보
+const inviteInfo = ref({
+  email: route.query.email || null, // 필요하다면 백엔드에서 받아올 수도 있음
+  companyName: route.query.companyName || null,
+  role: route.query.role || null,
 });
 
-// ✅ DB 회원가입 처리
-const submit = async () => {
-  try {
-    const payload = {
-      token,
-      name: name.value,
-      phone: phone.value,
-      password: password.value,
-    };
-    await api.post("/auth/signup/invite", payload);
-
-    alert("회원가입이 완료되었습니다! 로그인해주세요.");
-    router.push("/login");
-  } catch (err) {
-    console.error("회원가입 실패:", err);
-    alert("회원가입 중 오류가 발생했습니다.");
+const goTo = (type) => {
+  if (type === "direct") {
+    router.push(`/signup/invite?token=${route.query.token}`);
+  } else if (type === "google") {
+    window.location.href = `/oauth2/authorization/google?inviteToken=${route.query.token}`;
+  } else if (type === "naver") {
+    window.location.href = `/oauth2/authorization/naver?inviteToken=${route.query.token}`;
   }
 };
 </script>
 
 <style scoped>
-.invite-signup {
-  max-width: 500px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-button {
-  padding: 0.75rem;
-  background: #4cafef;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-button:hover {
-  background: #2196f3;
+.error-msg {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 </style>

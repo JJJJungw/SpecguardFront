@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import refreshApi from "@/api/refresh";
+import router from "@/router"; // ✅ Vue Router import
 
 const api = axios.create({
     baseURL: "http://localhost:8080/api/v1",
@@ -22,7 +23,7 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// ✅ 응답 인터셉터: 401 → Refresh 로직
+// ✅ 응답 인터셉터: 401 → Refresh 로직 + 에러 처리
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -34,6 +35,7 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        // ✅ 401 → Refresh 시도
         if (error.response?.status === 401) {
             const errorCode = error.response.data?.code;
 
@@ -55,6 +57,29 @@ api.interceptors.response.use(
                     authStore.logout();
                     return Promise.reject(err);
                 }
+            }
+        }
+
+        // ✅ 팀 약속: code/error/message 기반 라우팅 처리
+        if (error.response?.data) {
+            const { code, message } = error.response.data;
+
+            switch (code) {
+                case "EMAIL_MISMATCH":
+                    router.push({ path: "/signup/invite", query: { error: code, message } });
+                    break;
+                case "EXPIRED_TOKEN":
+                    router.push({ path: "/invite/expired", query: { error: code, message } });
+                    break;
+                case "ALREADY_REGISTERED":
+                    router.push({ path: "/login", query: { error: code, message } });
+                    break;
+                case "INVALID_TOKEN":
+                    router.push({ path: "/error", query: { error: code, message } });
+                    break;
+                default:
+                    router.push({ path: "/error", query: { message } });
+                    break;
             }
         }
 

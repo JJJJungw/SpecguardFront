@@ -2,6 +2,9 @@
   <div class="invite-choice">
     <h2>회원가입 방법 선택</h2>
 
+    <!-- ✅ 에러 메시지 표시 -->
+    <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
+
     <p>초대받은 이메일: <strong>{{ inviteInfo?.email }}</strong></p>
     <p>회사: <strong>{{ inviteInfo?.companyName }}</strong></p>
     <p>역할: <strong>{{ inviteInfo?.role }}</strong></p>
@@ -22,12 +25,16 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "@/api/axios";
 
-// ✅ 환경 변수에서 API 주소 가져오기 (VITE_API_URL=.env에 설정해둠)
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const route = useRoute();
 const router = useRouter();
 const token = route.query.token;
+
+// ✅ 에러 메시지 상태
+const errorMessage = ref(route.query.message || null);
+
+// ✅ 초대 정보
 const inviteInfo = ref(null);
 
 onMounted(async () => {
@@ -38,8 +45,7 @@ onMounted(async () => {
     inviteInfo.value = res.data;
   } catch (err) {
     console.error("초대 검증 실패:", err);
-    alert("초대 링크가 유효하지 않거나 만료되었습니다.");
-    router.push("/login");
+    // 에러 인터셉터가 이미 라우팅 처리하므로 여기서는 추가 동작 없음
   }
 });
 
@@ -48,7 +54,6 @@ const goForm = () => {
 };
 
 const goGoogleLogin = () => {
-  // ✅ Vue Router가 아닌 브라우저 네비게이션으로 백엔드 이동
   window.location.href = `${API_URL}/oauth2/authorization/google?inviteToken=${token}`;
 };
 
@@ -83,5 +88,10 @@ button {
 }
 button:hover {
   background: #2196f3;
+}
+.error-msg {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 </style>
