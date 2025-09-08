@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import api from "@/api/axios";
 import refreshApi from "@/api/refresh";
-import { login as loginApi } from "@/api/auth";
+import { login as loginApi, logout as logoutApi } from "@/api/auth"; // ✅ logoutApi 추가
 import { jwtDecode } from "jwt-decode";
 
 export const useAuthStore = defineStore("auth", {
@@ -55,7 +55,6 @@ export const useAuthStore = defineStore("auth", {
         // ✅ RefreshToken → AccessToken 재발급
         async refreshToken() {
             try {
-                // 🔹 수정: 백엔드 경로에 맞춤 (/auth/token/refresh)
                 const res = await refreshApi.post("/auth/token/refresh");
                 const newAccessToken =
                     res.headers["authorization"]?.replace("Bearer ", "");
@@ -78,8 +77,15 @@ export const useAuthStore = defineStore("auth", {
             }
         },
 
-        // 로그아웃
+        // ✅ 로그아웃
         async logout() {
+            try {
+                await logoutApi(); // 서버 로그아웃 호출
+            } catch (err) {
+                console.error("서버 로그아웃 실패:", err);
+            }
+
+            // 프론트 상태 정리
             this.accessToken = null;
             this.user = null;
             this.companySlug = null;

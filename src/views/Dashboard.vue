@@ -5,21 +5,25 @@
 
     <!-- ✅ 초대하기 버튼 -->
     <button class="invite-btn" @click="inviteUser">직원 초대하기</button>
+
+    <!-- ✅ 로그아웃 버튼 -->
+    <button class="logout-btn" @click="logoutUser">로그아웃</button>
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from "@/stores/auth";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import api from "@/api/axios";
-import { sendInvite } from "@/api/invite"; // ✅ 초대 API 연결
+import { sendInvite } from "@/api/invite";
 
 const authStore = useAuthStore();
 const user = ref(authStore.user);
 const companyName = ref("");
+const router = useRouter();
 
 onMounted(async () => {
-  // store에 유저정보 없을 경우 → 다시 불러오기
   if (!user.value && authStore.companySlug) {
     try {
       const res = await api.get(`/company/${authStore.companySlug}/users/me`, {
@@ -29,7 +33,6 @@ onMounted(async () => {
       authStore.user = res.data;
       localStorage.setItem("user", JSON.stringify(res.data));
 
-      // ✅ 회사 이름 세팅 (user 안에 company 정보 들어있음)
       companyName.value = res.data.company?.name || "";
     } catch (err) {
       console.error("유저 정보 불러오기 실패", err);
@@ -56,6 +59,18 @@ const inviteUser = async () => {
     alert("초대 중 오류가 발생했습니다.");
   }
 };
+
+// ✅ 로그아웃
+const logoutUser = async () => {
+  try {
+    await authStore.logout();
+    alert("로그아웃 되었습니다.");
+    router.push("/login");
+  } catch (err) {
+    console.error("로그아웃 실패:", err);
+    alert("로그아웃 중 오류가 발생했습니다.");
+  }
+};
 </script>
 
 <style scoped>
@@ -73,16 +88,25 @@ const inviteUser = async () => {
   padding: 1rem;
   border-radius: 8px;
 }
-.invite-btn {
+.invite-btn,
+.logout-btn {
   margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
-  background: #4cafef;
-  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  color: white;
+}
+.invite-btn {
+  background: #4cafef;
 }
 .invite-btn:hover {
   background: #2196f3;
+}
+.logout-btn {
+  background: #f44336;
+}
+.logout-btn:hover {
+  background: #d32f2f;
 }
 </style>
