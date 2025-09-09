@@ -35,7 +35,7 @@ api.interceptors.response.use(
             return Promise.reject(error);
         }
 
-        // ✅ 401 → Refresh 시도
+        //  401 → Refresh 시도
         if (error.response?.status === 401) {
             const errorCode = error.response.data?.code;
 
@@ -60,7 +60,7 @@ api.interceptors.response.use(
             }
         }
 
-        // ✅ 팀 약속: code/error/message 기반 라우팅 처리
+        //  팀 약속: code/error/message 기반 라우팅 처리
         if (error.response?.data) {
             const { code, message } = error.response.data;
 
