@@ -2,33 +2,55 @@
   <div class="signup">
     <h2>회사 회원가입</h2>
     <form @submit.prevent="submit">
-      <input v-model="companyName" placeholder="회사 이름" required />
-      <input v-model="email" type="email" placeholder="관리자 이메일" required />
-      <input v-model="name" placeholder="관리자 이름" required />
-      <input v-model="password" type="password" placeholder="비밀번호" required />
+      <!-- 회사 정보 -->
+      <input v-model="company.name" placeholder="회사 이름" required />
+      <input v-model="company.businessNumber" placeholder="사업자 번호" required />
+      <input v-model="company.slug" placeholder="회사 슬러그" required />
+      <input v-model="company.managerPosition" placeholder="담당자 직책" required />
+      <input v-model="company.managerName" placeholder="담당자 이름" required />
+      <input v-model="company.contactEmail" type="email" placeholder="회사 연락 이메일" required />
+      <input v-model="company.contactMobile" placeholder="회사 연락 전화번호" required />
+
+      <!-- 유저 정보 -->
+      <input v-model="user.name" placeholder="관리자 이름" required />
+      <input v-model="user.email" type="email" placeholder="관리자 이메일" required />
+      <input v-model="user.password" type="password" placeholder="비밀번호" required />
+      <input v-model="user.phone" placeholder="전화번호" required />
+
       <button type="submit">회원가입</button>
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { signup } from "@/api/auth";
 
-const companyName = ref("");
-const email = ref("");
-const name = ref("");
-const password = ref("");
 const router = useRouter();
+
+const company = reactive({
+  name: "",
+  businessNumber: "",
+  slug: "",
+  managerPosition: "",
+  managerName: "",
+  contactEmail: "",
+  contactMobile: "",
+});
+
+const user = reactive({
+  name: "",
+  email: "",
+  password: "",
+  phone: "",
+});
 
 const submit = async () => {
   try {
     const payload = {
-      companyName: companyName.value,
-      email: email.value,
-      name: name.value,
-      password: password.value,
+      company,
+      user,
     };
 
     await signup(payload);
